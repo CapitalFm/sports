@@ -29,23 +29,16 @@ com.cdm.sports.Core = function()
 	com.cdm.sports.Core.settings = new com.cdm.sports.Settings;
 	
 	com.cdm.sports.Core.notification = new com.cdm.sports.NotificationManager;
-	
-	var pageManager, 
-	
-	paginationManager,
-	
-	fixtures,
-	top;
-	
+		
 	this.scriptmanager.loadScripts( cdm['scripts']['general'] );
 	
-	pageManager = new com.cdm.sports.PageManager;
+	new com.cdm.sports.PageManager;
 	
-	paginationManager = new com.cdm.sports.PaginationManager;
+	new com.cdm.sports.PaginationManager;
 	
-	fixtures = new com.cdm.sports.Fixtures;
+	new com.cdm.sports.Fixtures;
 
-	top = new com.cdm.sports.ToTop;
+	new com.cdm.sports.ToTop;
 	
 	new com.cdm.sports.HomeSlider;
 	
