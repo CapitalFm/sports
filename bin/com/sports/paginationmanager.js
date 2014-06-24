@@ -6,16 +6,18 @@
 
 goog.provide('com.cdm.sports.PaginationManager');
 
-goog.require('goog.dom');
-goog.require('goog.dom.dataset');
-goog.require('goog.dom.selection');
-goog.require('goog.events.EventTarget');
+goog.require( 'goog.dom' );
+goog.require( 'goog.dom.selection' );
+
+goog.require( 'goog.events.EventTarget' );
+
 goog.require('goog.net.Jsonp');
-goog.require('goog.net.XhrManager');
-goog.require('goog.structs.Map');
-goog.require('goog.Uri.QueryData');
-goog.require('goog.Uri');
-goog.require('com.cdm.sports.Settings');
+goog.require( 'goog.net.XhrManager' );
+
+goog.require( 'goog.structs.Map' );
+
+goog.require( 'goog.Uri.QueryData');
+goog.require( 'goog.Uri' );
 
 /**
  * @constructor
@@ -24,14 +26,6 @@ goog.require('com.cdm.sports.Settings');
 com.cdm.sports.PaginationManager = function()
 {
 	this._init();
-	if( ! this.paginationWrapper )
-		return;
-	goog.events.listen( com.cdm.sports.Core.settings, com.cdm.sports.Settings.EventType.DISABLEXHR, this.disableXhr, true, this );
-	goog.events.listen( com.cdm.sports.Core.settings, com.cdm.sports.Settings.EventType.ENABLEXHR, this.enableXhr, true, this );
-	goog.events.listen( com.cdm.sports.Core.settings, com.cdm.sports.Settings.EventType.DISABLEINFINITE, this.disableInfinite, true, this );
-	goog.events.listen( com.cdm.sports.Core.settings, com.cdm.sports.Settings.EventType.ENABLEINFINITE, this.enableInfinite, true, this );
-	
-	goog.events.listen(window, goog.events.EventType.SCROLL, this.infiniteScroll, true, this);
 }
 
 goog.inherits( com.cdm.sports.PaginationManager, goog.events.EventTarget );
@@ -51,22 +45,7 @@ com.cdm.sports.PaginationManager.prototype._init = function()
 {
 	var btnName = 'pagination-btn',
 	
-	itemContainerName = 'all-articles',
-	
-	paginationWrapperName = 'paging-navigation';
-	
-	this.queryVars = {};
-	
-	this.itemHtml = this.isHome ? cdm['templates']['homestory'] : cdm['templates']['taxonomyitem'];
-	
-	if( !this.isHome )
-	{
-		this.paginationWrapper = goog.dom.getElementsByTagNameAndClass(null, paginationWrapperName)[0];
-		if( !this.paginationWrapper )
-			return;
-		this.setupPagination();
-		return;
-	}
+	itemContainerName = 'all-articles';
 	
 	this.paginationButton = goog.dom.getElement( btnName );
 	
@@ -81,11 +60,6 @@ com.cdm.sports.PaginationManager.prototype._init = function()
 }
 
 /**
- * @type {boolean}
- */
-com.cdm.sports.PaginationManager.prototype.isHome = cdm['settings']['ishome'];
-
-/**
  * @type {goog.net.XhrManager}
  */
 com.cdm.sports.PaginationManager.prototype.xhrManager = new goog.net.XhrManager;
@@ -94,7 +68,7 @@ com.cdm.sports.PaginationManager.prototype.xhrManager = new goog.net.XhrManager;
 /**
  * @type {string}
  */
-com.cdm.sports.PaginationManager.prototype.facebookGraphUrl = cdm['api']['facebookgraph'];
+com.cdm.sports.PaginationManager.prototype.facebookGraphUrl = 'http://graph.facebook.com';
 
 /**
  * @type {number}
@@ -127,42 +101,6 @@ com.cdm.sports.PaginationManager.prototype.queryHook = cdm['hooks']['pagination'
 com.cdm.sports.PaginationManager.prototype.taxonomy = '';
 
 /**
- * @type {string}
- */
-com.cdm.sports.PaginationManager.prototype.xhrBusyClass = 'working'
-
-/**
- * @type {Object}
- */
-com.cdm.sports.PaginationManager.prototype.queryVars = null;
-
-/**
- * @type {Object}
- */
-com.cdm.sports.PaginationManager.prototype.paginationConfiguration = null;
-
-/**
- * @type {Element}
- */
-com.cdm.sports.PaginationManager.prototype.paginationLinks = null;
-
-
-/**
- * @type {Element}
- */
-com.cdm.sports.PaginationManager.prototype.pageFooter = null;
-
-/**
- * @type {Element}
- */
-com.cdm.sports.PaginationManager.prototype.paginationWrapper = null;
-
-/**
- * @type {Element}
- */
-com.cdm.sports.PaginationManager.prototype.paginationWrapperParent = null;
-
-/**
  * @type {Element}
  */
 com.cdm.sports.PaginationManager.prototype.paginationButton = null;
@@ -185,60 +123,18 @@ com.cdm.sports.PaginationManager.prototype.articlesHTML = '';
 /**
  * @type {string}
  */
-com.cdm.sports.PaginationManager.prototype.itemHtml = '';
+com.cdm.sports.PaginationManager.prototype.itemHtml = cdm['templates']['homestory'];
 
 /**
  * @type {string}
  */
 com.cdm.sports.PaginationManager.prototype.nonce = cdm['settings']['csrf']['pagination'];
 
-com.cdm.sports.PaginationManager.prototype.setupPagination = function()
-{
-	var pageLinksContainerName = 'loop-pagination',
-	
-	configurationstr = goog.dom.dataset.get( this.paginationWrapper, 'config' ),
-	/**
-	 * @type {Object}
-	 */
-	configuration = goog.json.unsafeParse( /** @type {string} */( configurationstr ) );
-	
-	this.currentPage = configuration['page'];
-	
-	this.queryVars = configuration;
-	
-	this.paginationLinks = goog.dom.getElementsByTagNameAndClass('div', pageLinksContainerName, this.paginationWrapper )[0];
-	
-	this.itemsContainer = goog.dom.getElementsByTagNameAndClass('div', 'stories-holder' )[0];
-	
-	this.paginationWrapperParent = goog.dom.getAncestorByClass( this.paginationWrapper, 'col-sm-12' );
-	
-	this.pageFooter = goog.dom.getElement( 'primary-footer' );
-	
-	this.buttonAncestor = goog.dom.createDom('div',{'class':'xhr-paginator clearfix'},
-		(this.paginationButton = goog.dom.createDom('a',null, cdm['messages']['loadmore']))	
-	)//goog.dom.getAncestorByClass( this.paginationButton, 'xhr-paginator' );
-	//this.paginationButton = goog.dom.createDom('a',null);
-	
-	if( com.cdm.sports.Core.settings.xhrLoading )
-	{
-		goog.dom.removeChildren(/** @type {Node} */( this.paginationWrapper ) );
-		this.paginationWrapper.appendChild( this.buttonAncestor );
-	}
-	
-	goog.events.listen( this.paginationButton, goog.events.EventType.CLICK, this.fetch, false, this );
-	
-	this.fetch();
-	//this.itemsContainer
-	//console.info( this.buttonAncestor );
-}
 /**
  * 
  */
 com.cdm.sports.PaginationManager.prototype.fetch = function()
 {
-	if( ! com.cdm.sports.Core.settings.xhrLoading )
-		return;
-		
 	if( this.xhrBusy )
 	{
 		return false;
@@ -248,16 +144,15 @@ com.cdm.sports.PaginationManager.prototype.fetch = function()
 	
 	this.displaySpinner();
 	
-	var queryData = this.queryVars;
-	
-	queryData['action'] = this.queryHook;
-	queryData['page'] = this.currentPage + 1
-	//queryData['tax'] = this.taxonomy
-	queryData['home'] = this.isHome
-	queryData['nonce'] = this.nonce
 	
 	var data = goog.Uri.QueryData.createFromMap(
-		new goog.structs.Map(queryData)
+		new goog.structs.Map
+		({
+			'action':this.queryHook,
+			'page':this.currentPage + 1,
+			'tax':this.taxonomy,
+			'nonce':this.nonce
+		})
 	).toString();
 	
 	this.xhrManager.send( 'pagination', cdm.ajaxurl, 'POST', data, null, 1, goog.bind( this.processFeedback, this ) );
@@ -286,7 +181,7 @@ com.cdm.sports.PaginationManager.prototype.processFeedback = function( e )
 		
 		if( response == 0 )
 		{
-			console.log(cdm['messages']['xhrnotconfigured']);
+			console.log('the sports xhr receptor is not configured');
 			
 			this.dispatchEvent( com.cdm.sports.PaginationManager.EventType.ERROR );
 			
@@ -380,19 +275,11 @@ com.cdm.sports.PaginationManager.prototype.generateArticlesHtml = function( arti
  */
 com.cdm.sports.PaginationManager.prototype.printPage = function()
 {
-	var extraClass = this.isHome ? '':' row',
+	var articlesDom =/** @type {Element} */( goog.dom.htmlToDocumentFragment( this.articlesHTML ) ),
 	
-	articlesDom =/** @type {Element} */( goog.dom.htmlToDocumentFragment( this.articlesHTML ) ),
+	currentPageDom = goog.dom.createDom('div', { 'class':'page-'+( this.currentPage - 1 ) }, articlesDom );
 	
-	currentPageDom = goog.dom.createDom('div', { 'class':'page-'+( this.currentPage - 1 ) + extraClass }, articlesDom );
-	
-	if( this.paginationWrapperParent )
-	{
-		goog.dom.insertSiblingBefore( /** @type {Node} */( currentPageDom ), /** @type {Node} */( this.paginationWrapperParent ) );
-	}else
-	{
-		this.itemsContainer.appendChild( currentPageDom );
-	}
+	this.itemsContainer.appendChild( currentPageDom );
 	
 	this.getFacebookShares( currentPageDom, this.currentPagesUrls );
 	
@@ -418,7 +305,9 @@ com.cdm.sports.PaginationManager.prototype.printFacebookShares = function( dom, 
 	
 	shareTexts = [],
 	
-	shareDivs;	
+	shareDivs;
+	
+	
 	
 	documentFragment = dom;
 	
@@ -434,7 +323,7 @@ com.cdm.sports.PaginationManager.prototype.printFacebookShares = function( dom, 
 		
 		currenturl = urls[i];
 		
-		//console.log( currenturl );
+		console.log( currenturl );
 		
 		shareCount = ( 'undefined' == typeof shares[currenturl] || 'undefined' == typeof shares[currenturl]['shares']) ? 0 : shares[currenturl]['shares'];
 		
@@ -452,38 +341,10 @@ com.cdm.sports.PaginationManager.prototype.printFacebookShares = function( dom, 
  */
 com.cdm.sports.PaginationManager.prototype.displaySpinner = function()
 {
-	goog.dom.classes.add( this.buttonAncestor, this.xhrBusyClass ); 
+	goog.dom.classes.add( this.buttonAncestor, 'working'); 
 }
 
 com.cdm.sports.PaginationManager.prototype.hideSpinner = function()
 {
-	goog.dom.classes.remove( this.buttonAncestor, this.xhrBusyClass ); 
-}
-
-com.cdm.sports.PaginationManager.prototype.infiniteScroll = function()
-{
-	console.info(window.scrollY);
-}
-
-com.cdm.sports.PaginationManager.prototype.enableInfinite = function()
-{
-	//console.log('infinite scroll enabled');
-}
-com.cdm.sports.PaginationManager.prototype.disableInfinite = function()
-{
-	//console.log('infinite scroll disabled');
-}
-com.cdm.sports.PaginationManager.prototype.enableXhr = function()
-{
-	//console.log('ajax enabled');
-	goog.dom.removeChildren(/** @type {Node} */( this.paginationWrapper ) );
-	this.paginationWrapper.appendChild( this.buttonAncestor );
-	this.enableInfinite();
-}
-com.cdm.sports.PaginationManager.prototype.disableXhr = function()
-{
-	//console.log('ajax disabled');
-	goog.dom.removeChildren(/** @type {Node} */( this.paginationWrapper ) );
-	this.paginationWrapper.appendChild( this.paginationLinks );
-	this.disableInfinite();
+	goog.dom.classes.remove( this.buttonAncestor, 'working'); 
 }
