@@ -28,7 +28,7 @@ com.cdm.sports.Article = function( permalink, cache  )
 	
 	this.cache = cache;
 	
-	this.section = 'beta'
+	this.section = cdm['settings']['siteslug'];
 	
 	this.xhrBusy = false;
 	
@@ -46,7 +46,8 @@ com.cdm.sports.Article.EventType = {
   NOTFOUND: 'notfound',
   ERROR: 'error',
   FORBIDDEN: 'forbidden',
-  CONNECTIONERROR: 'connectionerror'
+  CONNECTIONERROR: 'connectionerror',
+  NOTARTICLE: 'notarticle'
 };
 
 com.cdm.sports.Article.prototype.close = function()
@@ -71,11 +72,11 @@ com.cdm.sports.Article.prototype.init_ = function()
 	
 	var data,
 	
-	baseurl = cdm['settings']['baseurl'];
+	debug = cdm['settings']['debug'];
 	
 	//console.log( baseurl );
 	
-	this.ajaxurl = goog.Uri.haveSameDomain( baseurl, this.permalink ) ? [cdm['settings']['baseurl'],this.section,'wp-admin','admin-ajax.php'].join('/') : cdm.ajaxurl;
+	this.ajaxurl = !debug ? [cdm['settings']['baseurl'],this.section,'wp-admin','admin-ajax.php'].join('/') : cdm.ajaxurl;
 	
 	
 	if( 'undefined' == typeof this.cache[ this.permalink ] )
@@ -182,7 +183,7 @@ com.cdm.sports.Article.prototype.processFeedback = function( e )
 		
 		if( response == 0 )
 		{
-			console.log('To webmaster: Please confirm the xhr/ajax receptor is configured on the server');
+			console.info( cdm['messages']['xhrnotconfigured'] );
 			
 			this.dispatchEvent( com.cdm.sports.Article.EventType.ERROR );
 			
@@ -302,26 +303,27 @@ com.cdm.sports.Article.prototype.generateHtml = function( data )
 	)
 	
 	return;
-	captions = goog.dom.getElementsByTagNameAndClass( 'div', 'wp-caption', this.html );
-	if(captions.length)
-	{
-		caption = captions[0];
-		
-		goog.dom.insertSiblingAfter(/** @type {Node} */(this.generateShareButtons( 'top hidden-xs' )),/** @type {Node} */(caption));
-		
-	}else
-	{
-		var paragraphs =  goog.dom.getElementsByTagNameAndClass( 'p', null, this.html ), paragraph;
-		if(paragraphs.length > 5)
-		{
-			paragraph = paragraphs[1]; //Out target is the second paragraph. *Hint: zero indexed array;
-			
-			goog.dom.insertSiblingAfter(/** @type {Node} */(this.generateShareButtons( 'top ' )),/** @type {Node} */(paragraph));
-			
-		}
-	}
 	
-	return;
+	//captions = goog.dom.getElementsByTagNameAndClass( 'div', 'wp-caption', this.html );
+	//if(captions.length)
+	//{
+		//caption = captions[0];
+		
+		//goog.dom.insertSiblingAfter(/** @type {Node} */(this.generateShareButtons( 'top hidden-xs' )),/** @type {Node} */(caption));
+		
+	//}else
+	//{
+		//var paragraphs =  goog.dom.getElementsByTagNameAndClass( 'p', null, this.html ), paragraph;
+		//if(paragraphs.length > 5)
+		//{
+			//paragraph = paragraphs[1]; //Out target is the second paragraph. *Hint: zero indexed array;
+			
+			//goog.dom.insertSiblingAfter(/** @type {Node} */(this.generateShareButtons( 'top ' )),/** @type {Node} */(paragraph));
+			
+		//}
+	//}
+	
+	//return;
 }
 /**
  * @param {string} cssclass
