@@ -19,6 +19,7 @@ goog.require( 'goog.Uri' );
 /**
  * @constructor
  * @extends {goog.events.EventTarget}
+ * To overhaul...the source is no longer valid...
  */
 com.cdm.sports.Fixtures = function()
 {

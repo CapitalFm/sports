@@ -38,6 +38,8 @@ goog.inherits( com.cdm.sports.PaginationManager, goog.events.EventTarget );
 
 /**
  * @enum {string}
+ * If a tree falls in the woods and nobody is around, does it make any sound? 
+ * Same case here...if there's no one listening for any of these events, are they really needed?
  */
 com.cdm.sports.PaginationManager.EventType = {
   DONE: 'pmdone',
